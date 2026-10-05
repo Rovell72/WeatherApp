@@ -1,0 +1,78 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Текущая погода";
+}
+
+<h1>Текущая погода</h1>
+
+<form method="post" class="search-form">
+    <input asp-for="City" placeholder="Введите название города, например, Киев" autocomplete="off" autofocus />
+    <button type="submit">Узнать погоду</button>
+</form>
+
+<span asp-validation-for="City" class="field-error"></span>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-error">@Model.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.DatabaseWarning))
+{
+    <div class="alert alert-warning">@Model.DatabaseWarning</div>
+}
+
+@if (Model.Weather is not null)
+{
+    <section class="card">
+        <h2>@Model.Weather.City@(string.IsNullOrEmpty(Model.Weather.Country) ? "" : ", " + Model.Weather.Country)</h2>
+
+        <div class="card-main">
+            <img src="@Model.Weather.IconUrl" alt="@Model.Weather.Description" width="100" height="100" />
+            <div>
+                <div class="temperature">@Model.Weather.Temperature.ToString("0.#") °C</div>
+                <div class="description">@Model.Weather.Description</div>
+            </div>
+        </div>
+
+        <dl class="details">
+            <dt>Ощущается как</dt>
+            <dd>@Model.Weather.FeelsLike.ToString("0.#") °C</dd>
+            <dt>Влажность</dt>
+            <dd>@Model.Weather.Humidity %</dd>
+            <dt>Давление</dt>
+            <dd>@Model.Weather.Pressure гПа</dd>
+            <dt>Скорость ветра</dt>
+            <dd>@Model.Weather.WindSpeed.ToString("0.#") м/с</dd>
+        </dl>
+    </section>
+}
+
+@if (Model.History.Count > 0)
+{
+    <section class="history">
+        <h2>Последние запросы</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Город</th>
+                    <th>Температура</th>
+                    <th>Описание</th>
+                    <th>Время</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.History)
+                {
+                    <tr>
+                        <td>@item.City</td>
+                        <td>@item.Temperature.ToString("0.#") °C</td>
+                        <td>@item.Description</td>
+                        <td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+}
